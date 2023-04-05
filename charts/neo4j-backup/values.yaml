@@ -1,0 +1,17 @@
+backup:
+  # The name of the GCS bucket where the backups will be stored.
+  bucket: "test"
+  # The path where the backups will be stored within the given bucket.
+  name: ""
+  # The address of the Kubernetes service where the backup is being taken from.
+  service: "cluster-name"
+  # A list of databases that need to be backed up.
+  databases: # The amount of memory and CPU to use for the backup job.
+
+  resources:
+    cpu: ""
+    memory: ""
+  # The restart policy for the backup job.
+  restartPolicy: ""
+  # Google serviceAccount with read and write access to the bucket.
+  serviceAccount: ""

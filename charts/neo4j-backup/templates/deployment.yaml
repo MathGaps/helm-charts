@@ -1,0 +1,61 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: neo4j-backup
+spec:
+  schedule: {{ default "0 3 * * *" .Values.backup.schedule }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          initContainers:
+            - name: neo4j-backup
+              image: neo4j:5.2-enterprise
+              command:
+                - "/bin/bash"
+                - "-c"
+                - |
+                  set -e
+                  if [ ! -d "/mnt/backups/{{ required "Name must provided" .Values.backup.name }}" ]; then
+                    mkdir /mnt/backups/{{.Values.backup.name}}
+                  fi
+                  DB_NAMES=[{{- range .Values.backup.database }} "{{.}}}" {{ end }}] | tr '[]' '()'
+                  for db in "${DB_NAMES[@]}"; do
+                    neo4j-admin database backup \
+                    --from={{ required "Backup service must be provided" .Values.backup.service }} \
+                    --to-path=/mnt/backups/{{.Values.backup.name}} \
+                    --verbose $db
+                  done
+              volumeMounts:
+                - name: shared-volume
+                  mountPath: /mnt/backups
+                  readOnly: false
+              resources:
+                limits:
+                  cpu: {{ default "200m" .Values.backup.resources.cpu }}
+                  memory: {{ default "800Mi" .Values.backup.resources.memory }}
+          containers:
+            - name: gcs-fuse
+              image: shubham030/gcs-fuse
+              command:
+                - "/bin/sh" 
+                - "-c"
+                - |
+                  echo {{ required "Service Account is required" .Values.backup.serviceAccount }} | base64 -d > /etc/gcloud/service-account.json
+                  gcsfuse {{ required "Bucket name must be provided" .Values.backup.bucket }} /mnt/gcs
+                  mv /mnt/backups/* /mnt/gcs/
+              volumeMounts:
+                - name: gcs-creds-volume
+                  mountPath: /etc/gcloud
+                - name: shared-volume
+                  mountPath: /mnt/gcs
+                - name: shared-volume
+                  mountPath: /mnt/backups
+              securityContext:
+                privileged: true
+          restartPolicy: {{ default "OnFailure" .Values.backup.restartPolicy }}
+          volumes:
+            - name: shared-volume
+              emptyDir: {}
+            - name: gcs-creds-volume
+              emptyDir: {}
