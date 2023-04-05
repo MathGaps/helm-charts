@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  neo4j-backup:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2023-04-05T10:49:34.389969307Z"
+    description: A Helm chart for Kubernetes
+    digest: 866f0e1b13c7b5a0485b96882e3d2f7ed449cacb0b3dd890c8f054cb7af3fc03
+    name: neo4j-backup
+    type: application
+    urls:
+    - https://github.com/MathGaps/helm-charts/releases/download/neo4j-backup-0.1.1/neo4j-backup-0.1.1.tgz
+    version: 0.1.1
+generated: "2023-04-05T10:49:34.389974307Z"
