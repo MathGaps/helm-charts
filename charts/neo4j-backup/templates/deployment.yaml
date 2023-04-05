@@ -19,13 +19,16 @@ spec:
                   if [ ! -d "/mnt/backups/{{ required "Name must provided" .Values.backup.name }}" ]; then
                     mkdir /mnt/backups/{{.Values.backup.name}}
                   fi
-                  DB_NAMES=[{{- range .Values.backup.database }} "{{.}}}" {{ end }}] | tr '[]' '()'
-                  for db in "${DB_NAMES[@]}"; do
+                  old_IFS=$IFS
+                  IFS=','
+                  db_names="{{- join "," .Values.backup.databases }}"
+                  for db in $db_names; do
                     neo4j-admin database backup \
                     --from={{ required "Backup service must be provided" .Values.backup.service }} \
                     --to-path=/mnt/backups/{{.Values.backup.name}} \
                     --verbose $db
                   done
+                  IFS=$old_IFS
               volumeMounts:
                 - name: shared-volume
                   mountPath: /mnt/backups
