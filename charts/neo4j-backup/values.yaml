@@ -7,7 +7,6 @@ backup:
   service: "cluster-name"
   # A list of databases that need to be backed up.
   databases: # The amount of memory and CPU to use for the backup job.
-
   resources:
     cpu: ""
     memory: ""
