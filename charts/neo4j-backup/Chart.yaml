@@ -1,6 +1,6 @@
 apiVersion: v2
 name: neo4j-backup
-description: Backup Neo4J databases
+description: Backup Neo4J databases to GCS
 type: application
 version: 0.1.0
 appVersion: "1.0.0"
