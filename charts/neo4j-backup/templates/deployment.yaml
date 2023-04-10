@@ -17,15 +17,15 @@ spec:
                 - |
                   set -e
                   if [ ! -d "/mnt/backups/{{ required "Name must provided" .Values.name }}" ]; then
-                    mkdir /mnt/backups/{{.Values.name}}
+                    mkdir /mnt/backups/{{ .Values.name }}
                   fi
                   old_IFS=$IFS
                   IFS=','
-                  db_names="{{- join "," .Values.databases }}"
+                  db_names="{{ - join "," .Values.databases }}"
                   for db in $db_names; do
                     neo4j-admin database backup \
                     --from={{ required "Backup service must be provided" .Values.service }} \
-                    --to-path=/mnt/backups/{{.Values.name}} \
+                    --to-path=/mnt/backups/{{ .Values.name }} \
                     --verbose $db
                   done
                   IFS=$old_IFS
