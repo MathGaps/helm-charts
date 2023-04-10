@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: {{ .Release.Name }}-neo4j-backup
 spec:
-  schedule: {{ default "0 3 * * *" .Values.backup.schedule }}
+  schedule: {{ default "0 3 * * *" .Values.schedule }}
   jobTemplate:
     spec:
       template:
@@ -16,16 +16,16 @@ spec:
                 - "-c"
                 - |
                   set -e
-                  if [ ! -d "/mnt/backups/{{ required "Name must provided" .Values.backup.name }}" ]; then
-                    mkdir /mnt/backups/{{.Values.backup.name}}
+                  if [ ! -d "/mnt/backups/{{ required "Name must provided" .Values.name }}" ]; then
+                    mkdir /mnt/backups/{{ .Values.name }}
                   fi
                   old_IFS=$IFS
                   IFS=','
-                  db_names="{{- join "," .Values.backup.databases }}"
+                  db_names="{{ - join "," .Values.databases }}"
                   for db in $db_names; do
                     neo4j-admin database backup \
-                    --from={{ required "Backup service must be provided" .Values.backup.service }} \
-                    --to-path=/mnt/backups/{{.Values.backup.name}} \
+                    --from={{ required "Backup service must be provided" .Values.service }} \
+                    --to-path=/mnt/backups/{{ .Values.name }} \
                     --verbose $db
                   done
                   IFS=$old_IFS
@@ -35,8 +35,8 @@ spec:
                   readOnly: false
               resources:
                 limits:
-                  cpu: {{ default "200m" .Values.backup.resources.cpu }}
-                  memory: {{ default "800Mi" .Values.backup.resources.memory }}
+                  cpu: {{ default "200m" .Values.resources.cpu }}
+                  memory: {{ default "800Mi" .Values.resources.memory }}
           containers:
             - name: gcs-fuse
               image: shubham030/gcs-fuse
@@ -44,8 +44,8 @@ spec:
                 - "/bin/sh" 
                 - "-c"
                 - |
-                  echo {{ required "Service Account is required" .Values.backup.serviceAccount }} | base64 -d > /etc/gcloud/service-account.json
-                  gcsfuse {{ required "Bucket name must be provided" .Values.backup.bucket }} /mnt/gcs
+                  echo {{ required "Service Account is required" .Values.serviceAccount }} | base64 -d > /etc/gcloud/service-account.json
+                  gcsfuse {{ required "Bucket name must be provided" .Values.bucket }} /mnt/gcs
                   mv /mnt/backups/* /mnt/gcs/
               volumeMounts:
                 - name: gcs-creds-volume
@@ -56,7 +56,7 @@ spec:
                   mountPath: /mnt/backups
               securityContext:
                 privileged: true
-          restartPolicy: {{ default "OnFailure" .Values.backup.restartPolicy }}
+          restartPolicy: {{ default "OnFailure" .Values.restartPolicy }}
           volumes:
             - name: shared-volume
               emptyDir: {}
