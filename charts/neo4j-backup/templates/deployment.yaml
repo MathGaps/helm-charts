@@ -21,7 +21,7 @@ spec:
                   fi
                   old_IFS=$IFS
                   IFS=','
-                  db_names="{{ - join "," .Values.databases }}"
+                  db_names="{{- join "," .Values.databases }}"
                   for db in $db_names; do
                     neo4j-admin database backup \
                     --from={{ required "Backup service must be provided" .Values.service }} \
