@@ -21,7 +21,9 @@ spec:
                   fi
                   old_IFS=$IFS
                   IFS=','
+                  echo {{ .Values.databases }}
                   db_names="{{- join "," .Values.databases }}"
+                  echo db_names
                   for db in $db_names; do
                     neo4j-admin database backup \
                     --from={{ required "Backup service must be provided" .Values.service }} \
@@ -46,7 +48,10 @@ spec:
                 - |
                   echo {{ required "Service Account is required" .Values.serviceAccount }} | base64 -d > /etc/gcloud/service-account.json
                   gcsfuse {{ required "Bucket name must be provided" .Values.bucket }} /mnt/gcs
-                  mv /mnt/backups/* /mnt/gcs/
+                  if [ ! -d "/mnt/gcs/{{ .Values.name }}" ]; then
+                    mkdir /mnt/gcs/{{ .Values.name }}
+                  fi
+                  mv /mnt/backups/{{ .Values.name }}/* /mnt/gcs/{{ .Values.name }}
               volumeMounts:
                 - name: gcs-creds-volume
                   mountPath: /etc/gcloud
