@@ -6,6 +6,7 @@ spec:
   schedule: {{ default "0 3 * * *" .Values.schedule }}
   jobTemplate:
     spec:
+      ttlSecondsAfterFinished: {{ default 57600 .Values.ttlSecondsAfterFinished }} # 16 hours by default
       template:
         spec:
           initContainers:
