@@ -1,3 +1,5 @@
+# The neo4j image to use for the backup job.
+image: ""
 # The name of the GCS bucket where the backups will be stored.
 bucket: "test"
 # The path where the backups will be stored within the given bucket.
