@@ -3,6 +3,16 @@ entries:
   neo4j-backup:
   - apiVersion: v2
     appVersion: 1.0.0
+    created: "2025-03-24T10:37:19.788965524Z"
+    description: Backup Neo4J databases to GCS
+    digest: 25b849354ecb8996a1a8e9736dbf79824266acc0bea5c82f281246c5fc7f1e47
+    name: neo4j-backup
+    type: application
+    urls:
+    - https://github.com/MathGaps/helm-charts/releases/download/neo4j-backup-0.4.0/neo4j-backup-0.4.0.tgz
+    version: 0.4.0
+  - apiVersion: v2
+    appVersion: 1.0.0
     created: "2024-07-08T02:09:49.839981123Z"
     description: Backup Neo4J databases to GCS
     digest: bdcb6bd1eb085870132b3a2205f46927081b390f41864f7c102f58a15fbb52da
@@ -111,4 +121,4 @@ entries:
     urls:
     - https://github.com/MathGaps/helm-charts/releases/download/neo4j-backup-0.1.0/neo4j-backup-0.1.0.tgz
     version: 0.1.0
-generated: "2024-07-08T02:09:49.840040924Z"
+generated: "2025-03-24T10:37:19.789034974Z"
