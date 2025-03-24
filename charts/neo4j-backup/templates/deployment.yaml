@@ -11,7 +11,7 @@ spec:
         spec:
           initContainers:
             - name: neo4j-backup
-              image: {{ default "neo4j:5.20.0-enterprise" .Values.image }}
+              image: {{ default "neo4j:5.26.0-enterprise" .Values.image }}
               command:
                 - "/bin/bash"
                 - "-c"
