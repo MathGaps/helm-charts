@@ -52,7 +52,7 @@ spec:
                   if [ ! -d "/mnt/gcs/{{ .Values.name }}" ]; then
                     mkdir /mnt/gcs/{{ .Values.name }}
                   fi
-                  mv /mnt/backups/{{ .Values.name }}/* /mnt/gcs/{{ .Values.name }}
+                  gsutil cp /mnt/backups/{{ .Values.name }}/* gs://{{ .Values.bucket }}/{{ .Values.name }}/
               volumeMounts:
                 - name: gcs-creds-volume
                   mountPath: /etc/gcloud
