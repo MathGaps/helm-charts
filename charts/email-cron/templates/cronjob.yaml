@@ -1,0 +1,62 @@
+# Fires on .Values.schedule around the clock; the app decides whether to send
+# based on the window in {{ .Release.Name }}-config. Runs outside the window
+# exit 0 immediately, so ramp-ups are values-only changes.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app: {{ .Release.Name }}
+spec:
+  schedule: {{ .Values.schedule | quote }}
+  # Requires Kubernetes >= 1.27; DST-aware.
+  timeZone: {{ .Values.timeZone | quote }}
+  suspend: {{ .Values.suspend }}
+  # Never run two sends at once — the cursor on the PVC is not lock-protected.
+  concurrencyPolicy: Forbid
+  # If the cluster was down at fire time, start up to 10 minutes late;
+  # otherwise skip (the cursor makes skips safe).
+  startingDeadlineSeconds: 600
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      # One retry on failure; the cursor only advances after a successful run,
+      # so a retried Job resends the same slice rather than skipping it.
+      backoffLimit: 1
+      activeDeadlineSeconds: 900
+      template:
+        metadata:
+          labels:
+            app: {{ .Release.Name }}
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: {{ .Release.Name }}
+              image: "{{ required "image.repository is required" .Values.image.repository }}:{{ required "image.tag is required" .Values.image.tag }}"
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              args: ["email-cron", "$(RECIPIENTS_CSV)"]
+              envFrom:
+                - configMapRef:
+                    name: {{ .Release.Name }}-config
+              env:
+                - name: SENDGRID_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.sendgrid.secretName }}
+                      key: {{ .Values.sendgrid.secretKey }}
+              volumeMounts:
+                - name: recipients
+                  mountPath: /data
+                  readOnly: true
+                - name: state
+                  mountPath: /state
+              resources:
+                {{- toYaml .Values.resources | nindent 16 }}
+          volumes:
+            - name: recipients
+              configMap:
+                name: {{ .Values.recipients.configMapName }}
+            - name: state
+              persistentVolumeClaim:
+                claimName: {{ .Release.Name }}-state

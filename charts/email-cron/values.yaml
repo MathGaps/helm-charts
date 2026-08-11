@@ -1,0 +1,57 @@
+# Container image running the sender. The image's entrypoint must accept
+# the args ["email-cron", "<csv path>"] and honor the environment variables
+# documented in README.md. Both fields are required.
+image:
+  repository: ""
+  tag: ""
+  pullPolicy: IfNotPresent
+
+# Pause the campaign without uninstalling (kubectl-free kill switch).
+suspend: false
+
+# Emails sent per run. The CronJob fires on `schedule` around the clock;
+# runs outside the window below exit immediately without sending, so
+# window + emailsPerRun fully define throughput.
+emailsPerRun: 50
+
+# Send window, end-exclusive, evaluated inside the app in `window.timezone`.
+# This is the knob for send hours — not the CronJob schedule.
+window:
+  start: "09:00"
+  end: "17:00"
+  timezone: "UTC"
+
+# Fire cadence and the timezone Kubernetes evaluates it in. Rarely changed —
+# prefer tuning window/emailsPerRun above. timeZone requires Kubernetes >= 1.27.
+schedule: "*/30 * * * *"
+timeZone: "UTC"
+
+# ConfigMap holding the recipient CSV, created out-of-band (recipient lists
+# are PII — keep them out of git):
+#   kubectl create configmap email-recipients --from-file=recipients.csv
+recipients:
+  configMapName: email-recipients
+  fileName: recipients.csv
+
+# SendGrid settings. The API key itself is never a chart value — only the
+# reference to the Secret holding it (created out-of-band).
+sendgrid:
+  secretName: sendgrid
+  secretKey: api-key
+  # Dynamic template used for every email in the campaign. Required.
+  templateId: ""
+
+# Passed to the sender as EMAIL_ENVIRONMENT.
+emailEnvironment: production
+
+# PVC persisting the campaign cursor between runs.
+state:
+  size: 1Gi
+  storageClassName: ""
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    memory: 128Mi

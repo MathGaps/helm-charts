@@ -1,0 +1,6 @@
+apiVersion: v2
+name: email-cron
+description: Rate-limited, resumable email drip campaign CronJob
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

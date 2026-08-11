@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-config
+  labels:
+    app: {{ .Release.Name }}
+data:
+  EMAILS_PER_RUN: {{ .Values.emailsPerRun | quote }}
+  WINDOW_START: {{ .Values.window.start | quote }}
+  WINDOW_END: {{ .Values.window.end | quote }}
+  SEND_TIMEZONE: {{ .Values.window.timezone | quote }}
+  RECIPIENTS_CSV: {{ printf "/data/%s" .Values.recipients.fileName | quote }}
+  STATE_DIR: "/state"
+  SENDGRID_TEMPLATE_ID: {{ required "sendgrid.templateId is required" .Values.sendgrid.templateId | quote }}
+  EMAIL_ENVIRONMENT: {{ .Values.emailEnvironment | quote }}
